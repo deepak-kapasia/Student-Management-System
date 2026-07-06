@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import api from '../services/api';
 
 export const AuthContext = createContext();
@@ -9,23 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
     const storedUser = localStorage.getItem('user');
+
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+
     setLoading(false);
   }, []);
 
+  // Login User
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password,
       });
+
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
-      return { success: true };
+
+      return {
+        success: true,
+      };
     } catch (error) {
       return {
         success: false,
@@ -34,16 +39,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Register User
   const register = async (name, email, password) => {
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/register', {
+      const response = await api.post('/auth/register', {
         name,
         email,
         password,
       });
+
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
-      return { success: true };
+
+      return {
+        success: true,
+      };
     } catch (error) {
       return {
         success: false,
@@ -52,13 +62,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout User
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
